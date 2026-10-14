@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Renders vertical, bold, transparent-background PNGs. Requires rsvg-convert and Pillow.
 set -euo pipefail
-cd "$(dirname "$0")/.."  # repo root, so PNGs are written next to index.html
+cd "$(dirname "$0")/.."
+mkdir -p images
 gen() { # file text color
   tmp=$(mktemp).svg
   cat > "$tmp" <<SVG
@@ -19,6 +20,11 @@ im.crop((bb[0]-pad, bb[1]-pad, bb[2]+pad, bb[3]+pad)).save(p)
 PY
   rm -f "$tmp"
 }
-gen overview.png "Overview" "#AAAAAA"
-gen elastic-stack.png "Elastic Stack" "#0077CC"
-gen azure-resource.png "Azure Resource" "#00BFB3"
+if [ "$#" -eq 3 ]; then
+  gen "$@"   # usage: utils/generate.sh <images/file.png> "<text>" "<#RRGGBB>"
+  exit 0
+fi
+
+gen images/overview.png "Overview" "#AAAAAA"
+gen images/elastic-stack.png "Elastic Stack" "#0077CC"
+gen images/azure-resources.png "Azure Resources" "#00BFB3"
