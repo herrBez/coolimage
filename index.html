@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Vertical text SVG</title>
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+  svg { display: block; }
+</style>
+</head>
+<body>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var text = params.get("text") || "Azure Resource";
+  var raw = (params.get("color") || "0x000000").trim();
+
+  // Accepts 0xFFFFF, #FFF, FFFFFF, ... ; short values are left-padded to 6 digits
+  var hex = raw.replace(/^(0x|#)/i, "").replace(/[^0-9a-f]/gi, "");
+  if (hex.length === 3) hex = hex.replace(/./g, "$&$&");
+  else hex = ("000000" + hex).slice(-6);
+  var color = "#" + hex;
+
+  var fontSize = 16;
+  var font = "Segoe UI, Arial, sans-serif";
+  var ns = "http://www.w3.org/2000/svg";
+
+  // Measure the text first
+  var probe = document.createElementNS(ns, "svg");
+  var t = document.createElementNS(ns, "text");
+  t.setAttribute("font-family", font);
+  t.setAttribute("font-size", fontSize);
+  t.setAttribute("font-weight", "bold");
+  t.textContent = text;
+  probe.appendChild(t);
+  document.body.appendChild(probe);
+  var box = t.getBBox();
+  document.body.removeChild(probe);
+
+  var pad = 4;
+  var w = Math.ceil(box.height) + pad * 2;   // vertical: width = text height
+  var h = Math.ceil(box.width) + pad * 2;    // vertical: height = text length
+
+  function esc(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  // Rotate -90° so the text reads bottom-to-top; background stays transparent
+  var svg =
+    '<svg xmlns="' + ns + '" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + " " + h + '">' +
+    '<text transform="translate(' + (w / 2) + " " + (h / 2) + ') rotate(-90)" ' +
+    'text-anchor="middle" dominant-baseline="central" ' +
+    'font-family="' + font + '" font-size="' + fontSize + '" font-weight="bold" fill="' + color + '">' +
+    esc(text) + "</text></svg>";
+
+  document.body.innerHTML = svg;
+})();
+</script>
+</body>
+</html>
